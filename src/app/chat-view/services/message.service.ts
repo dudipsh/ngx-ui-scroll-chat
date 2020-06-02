@@ -1,18 +1,24 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Apollo, QueryRef} from 'apollo-angular';
-import {map} from 'rxjs/operators';
+import {map, take} from 'rxjs/operators';
 import {READ_MESSAGE_PAGINATION} from './chat.gql';
+import {Subject} from 'rxjs';
+import {Message} from './message';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageService {
+  lastIndex: number;
   feedQuery: QueryRef<any>;
-
+  newMessages$: Subject<Message[]>;
+  channelId: string;
 
   constructor(
     private apollo: Apollo
-  ) { }
+  ) {
+  }
 
 
   // init the list //
@@ -31,7 +37,7 @@ export class MessageService {
     return this.feedQuery
       .valueChanges
       .pipe(map(({data}) => data))
-      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate))
+      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate));
   }
 
 

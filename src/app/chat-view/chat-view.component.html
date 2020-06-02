@@ -1,4 +1,7 @@
 <div id="viewport">
-  <p>chat-view works!</p>
-
+  <div *uiScroll="let message of datasource">
+    <div class="item">
+      <pre>{{message | json}}</pre>
+    </div>
+  </div>
 </div>
