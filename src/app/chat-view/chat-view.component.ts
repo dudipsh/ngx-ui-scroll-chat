@@ -15,7 +15,7 @@ export class ChatViewComponent implements OnInit {
   datasource = new Datasource({
     get: (index, count) => {
       console.log(index, count)
-      return this.messageService.readMessage(this.channelId, index, count).pipe((take(1)))
+      return this.messageService.requestData(this.channelId, index, count)
     },
     settings: {
       startIndex: 0,
@@ -28,13 +28,14 @@ export class ChatViewComponent implements OnInit {
 
   constructor(
     private messageService: MessageService,
-  ) { }
+  ) {
+
+  }
 
   ngOnInit(): void {
-     // get first 50 items
-    this.messageService.readMessage(this.channelId, 50, 0).subscribe((res) => {
-      console.log(res)
-    }, (err) => console.log(err))
+    this.messageService.loadFirstBulk(this.channelId);
+    //  get first 50 items
+
   }
 
 }
