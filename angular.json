@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1, 
+  "version": 1,
   "newProjectRoot": "projects",
   "projects": {
     "ngx-ui-scroll-chat": {
@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "ngx-ui-scroll-chat"
+    }
+  },
+  "defaultProject": "ngx-ui-scroll-chat",
+  "cli": {
+    "analytics": "050f5082-4695-429f-8a6f-1225dfde009c"
+  }
 }
