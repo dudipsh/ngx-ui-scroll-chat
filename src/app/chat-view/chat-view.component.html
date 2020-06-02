@@ -1,8 +1,8 @@
 <div id="viewport">
   <div *uiScroll="let message of datasource">
     <div class="item">
-<!--      <div>{{message?.ts | date : 'dd/mm/yy hh:mm'}}</div>-->
-      <div>{{message?.text}}</div>
+      <div>{{message?.ts | date : 'dd-MM hh:mm'}} </div>
+      <div><b>{{message?.text}}</b></div>
     </div>
   </div>
 </div>

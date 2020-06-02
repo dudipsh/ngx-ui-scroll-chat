@@ -34,7 +34,8 @@ export class MessageService {
 
 
   loadFirstBulk(channelId) {
-    this.readMessage(channelId, 50, 0).subscribe((message: Message[]) => {
+    this.readMessage(channelId, 0, 1).subscribe((message: Message[]) => {
+      this.data = message;
     });
   }
 
@@ -81,16 +82,17 @@ export class MessageService {
     const _count = count - (_index - index);
     console.log(_count);
     // console.log('remote:', _index, _count);
-    return forkJoin(of(result), this.fetchMoreMessages(channelId, _index, _count))
+    return forkJoin(this.fetchMoreMessages(channelId, 50, index))
       .pipe(
-        map(([cached, remote]) => {
-          console.log(cached, remote);
+        map(([remote]) => {
+       //   console.log(cached, remote);
           console.log(remote)
-          // remote.forEach((item, i) => {
-          //   this.cache.set(_index + i, item);
-          //   this.lastIndex = Math.max(this.lastIndex, _index + i);
-          // });
-          return [...cached, ...remote.data.readMessageByChannelByDate];
+          remote.data.readMessageByChannelByDate.forEach((item, i) => {
+            this.cache.set(_index + i, item);
+            this.lastIndex = Math.max(this.lastIndex, _index + i);
+          });
+          return [...remote.data.readMessageByChannelByDate];
+       //   return [...remote.data.readMessageByChannelByDate];
         })
       );
 
@@ -126,6 +128,7 @@ export class MessageService {
     if (start <= end) {
       data = this.data.slice(start, end + 1);
     }
+
     return this.DELAY_MS > 0 ? of(data).pipe(delay(this.DELAY_MS)) : of(data);
   }
 }
