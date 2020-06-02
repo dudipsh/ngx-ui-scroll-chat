@@ -1,17 +1,17 @@
 import {Injectable} from '@angular/core';
 import {Apollo, QueryRef} from 'apollo-angular';
 import {delay, map} from 'rxjs/operators';
-import {READ_MESSAGE_PAGINATION} from './chat.gql';
-import {forkJoin, Observable, of, Subject} from 'rxjs';
+import {from, Observable, of, Subject} from 'rxjs';
 import {Message} from '../message';
+import {ChatApiService} from './chat-api.service';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageService {
-  lastIndex: number;
-  feedQuery: QueryRef<any>;
+  lastIndex = -1;
+  queryRef: QueryRef<any>;
   channelId: string;
 
   cache: Map<number, Message>;
@@ -24,7 +24,8 @@ export class MessageService {
   data: Message[] = [];
 
   constructor(
-    private apollo: Apollo
+    private apollo: Apollo,
+    private chatApiService: ChatApiService
   ) {
     this.lastIndex = -1;
     this.cache = new Map<number, Message>();
@@ -34,29 +35,13 @@ export class MessageService {
 
 
   loadFirstBulk(channelId) {
-    this.readMessage(channelId, 0, 1).subscribe((message: Message[]) => {
-      this.data = message;
-    });
-  }
-
-
-  // init the list //
-  readMessage(channelId: string, first: number, skip: number) {
-    this.feedQuery = this.apollo.watchQuery({
-      query: READ_MESSAGE_PAGINATION,
-      variables: {
-        channelId,
-        first,
-        skip
-      },
-      fetchResults: true,
-      fetchPolicy: 'network-only',
-    });
-
-    return this.feedQuery
-      .valueChanges
+    this.queryRef = this.chatApiService.readMessage(channelId, 1, 0);
+    this.queryRef.valueChanges
       .pipe(map(({data}) => data))
-      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate));
+      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate))
+      .subscribe((message: Message[]) => {
+        this.data = message;
+      });
   }
 
   requestData(channelId: string, index: number, count: number): Observable<Message[]> {
@@ -82,42 +67,14 @@ export class MessageService {
     const _count = count - (_index - index);
     console.log(_count);
     // console.log('remote:', _index, _count);
-    return forkJoin(this.fetchMoreMessages(channelId, 50, index))
-      .pipe(
-        map(([remote]) => {
-       //   console.log(cached, remote);
-          console.log(remote)
-          remote.data.readMessageByChannelByDate.forEach((item, i) => {
-            this.cache.set(_index + i, item);
-            this.lastIndex = Math.max(this.lastIndex, _index + i);
-          });
-          return [...remote.data.readMessageByChannelByDate];
-       //   return [...remote.data.readMessageByChannelByDate];
-        })
-      );
+    return from(this.chatApiService.fetchMoreMessages(this.queryRef, channelId, 50, index, (prev, {fetchMoreResult}) => {
+      console.log(prev);
+      console.log(fetchMoreResult);
+      const result = [...prev.readMessageByChannelByDate, ...fetchMoreResult.readMessageByChannelByDate] as any[]
+      return result
+    })).pipe(map(({data}) => data))
+      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate)) as Observable<any>
 
-  }
-
-  // fetch more data when scrolled to first item // (top)
-  fetchMoreMessages(channelId: string, first: number, skip: number) {
-    if (!channelId) {
-      return;
-    }
-    return this.feedQuery.fetchMore({
-      variables: {
-        channelId,
-        first,
-        skip
-      },
-      updateQuery: (prev, {fetchMoreResult}) => {
-        if (!fetchMoreResult || !prev) {
-          return prev;
-        }
-        return of(Object.assign({}, prev, {
-          readMessageByChannelByDate: [...prev.readMessageByChannelByDate, ...fetchMoreResult.readMessageByChannelByDate],
-        }));
-      },
-    });
   }
 
 

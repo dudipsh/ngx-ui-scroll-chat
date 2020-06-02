@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {Datasource} from 'ngx-ui-scroll';
 import {MessageService} from './services/message.service';
 import {take} from 'rxjs/operators';
+import {of} from 'rxjs';
 
 @Component({
   selector: 'app-chat-view',
@@ -14,8 +15,8 @@ export class ChatViewComponent implements OnInit {
 
   datasource = new Datasource({
     get: (index, count) => {
-      console.log(index, count)
-      return this.messageService.requestData(this.channelId, index, count)
+    //  if (index < 0 || count < 0) return of([]);
+     return  this.messageService.requestData(this.channelId, index, count)
     },
     settings: {
       startIndex: 0,
