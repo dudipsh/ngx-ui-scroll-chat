@@ -23,9 +23,11 @@ export class ChatApiService {
         first,
         skip
       },
-      fetchResults: true,
-      fetchPolicy: 'network-only',
-    });
+      // fetchResults: true,
+      // fetchPolicy: 'network-only',
+    }).valueChanges
+      .pipe(map(({data}) => data))
+      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate)) as Observable<any[]>;
   }
 
 

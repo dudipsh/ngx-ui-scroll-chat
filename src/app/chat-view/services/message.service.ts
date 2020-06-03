@@ -1,52 +1,32 @@
 import {Injectable} from '@angular/core';
-import {Apollo, QueryRef} from 'apollo-angular';
-import {delay, map} from 'rxjs/operators';
-import {from, Observable, of, Subject} from 'rxjs';
-import {Message} from '../message';
-import {ChatApiService} from './chat-api.service';
+import {forkJoin, of, Subject} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {RemoteService} from './remote.service';
 
+interface Item {
+  id: number;
+  text: string;
+}
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MessageService {
-  lastIndex = -1;
-  queryRef: QueryRef<any>;
-  channelId: string;
 
-  cache: Map<number, Message>;
-  newMessages$: Subject<Message[]>;
+  lastIndex: number;
+  cache: Map<number, any>;
+  newMessages$: Subject<any[]>;
 
-
-  MIN = 0;
-  MAX = 2;
-  DELAY_MS = 250;
-  data: Message[] = [];
-
-  constructor(
-    private apollo: Apollo,
-    private chatApiService: ChatApiService
-  ) {
-    this.lastIndex = -1;
-    this.cache = new Map<number, Message>();
-
-
+  constructor(private remoteService: RemoteService) {
+    this.lastIndex = 0;
+    this.cache = new Map<number, any>();
+    this.newMessages$ = new Subject();
   }
 
-
-  loadFirstBulk(channelId) {
-    this.queryRef = this.chatApiService.readMessage(channelId, 1, 0);
-    this.queryRef.valueChanges
-      .pipe(map(({data}) => data))
-      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate))
-      .subscribe((message: Message[]) => {
-        this.data = message;
-      });
-  }
-
-  requestData(channelId: string, index: number, count: number): Observable<Message[]> {
+  requestData(channelId, index: number, count: number) {
     // looking for cached items
-    const result: Message[] = [];
+
+    const result: any[] = [];
     console.log('request:', index, count);
     let _index = null;
     for (let i = index; i < index + count; i++) {
@@ -62,30 +42,48 @@ export class MessageService {
       return of(result);
     }
 
-    // // retrieve non-cached items
+    // retrieve non-cached items
     const _result = of(result);
     const _count = count - (_index - index);
-    console.log(_count);
-    // console.log('remote:', _index, _count);
-    return from(this.chatApiService.fetchMoreMessages(this.queryRef, channelId, 50, index, (prev, {fetchMoreResult}) => {
-      console.log(prev);
-      console.log(fetchMoreResult);
-      const result = [...prev.readMessageByChannelByDate, ...fetchMoreResult.readMessageByChannelByDate] as any[]
-      return result
-    })).pipe(map(({data}) => data))
-      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate)) as Observable<any>
+    console.log('remote:', _index, _count);
+    return this.remoteService.retrieve(channelId, _index, _count)
+    // return forkJoin(this.remoteService.retrieve(channelId, _index, _count))
+    //   .pipe(
+    //     map((remote) => {
+    //       console.log('!!!!!!!!');
+    //       console.log(remote);
+    //
+    //       remote.forEach((item, i) => {
+    //         console.log(item);
+    //         this.cache.set(_index + i, item);
+    //         this.lastIndex = Math.max(this.lastIndex, _index + i);
+    //       });
+    //       return [...remote];
+    //     })
+    //   );
 
+
+    // return forkJoin(of(result), this.remoteService.retrieve(channelId, count, index ))
+    //   .pipe(
+    //     map(([cached, remote]) => {
+    //       console.log(cached, remote);
+    //       remote.forEach((item, i) => {
+    //         this.cache.set(_index + i, item);
+    //         this.lastIndex = Math.max(this.lastIndex, _index + i);
+    //         console.log(this.lastIndex)
+    //       });
+    //       return [...cached, ...remote];
+    //     })
+    //   );
   }
 
-
-  retrieve(index: number, count: number): Observable<Message[]> {
-    let data = [];
-    const start = Math.max(this.MIN, index);
-    const end = Math.min(index + count - 1, this.MAX);
-    if (start <= end) {
-      data = this.data.slice(start, end + 1);
-    }
-
-    return this.DELAY_MS > 0 ? of(data).pipe(delay(this.DELAY_MS)) : of(data);
-  }
+  // appendNewMessages(count: number) {
+  //   this.remoteService.emulateNewMessages(count).subscribe(data => {
+  //     data.forEach((item, i) => {
+  //       this.lastIndex++;
+  //       this.cache.set(this.lastIndex, item);
+  //     });
+  //     this.newMessages$.next(data);
+  //   });
+  // }
 }
