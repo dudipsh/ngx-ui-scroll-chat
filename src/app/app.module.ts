@@ -16,6 +16,7 @@ import {UiScrollModule} from 'ngx-ui-scroll';
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     AppRoutingModule,
     GraphQLModule,
     UiScrollModule,

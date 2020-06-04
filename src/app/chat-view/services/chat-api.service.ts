@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
-import {READ_MESSAGE_PAGINATION} from './chat.gql';
-import {Apollo} from 'apollo-angular';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {MessageServerResult} from './message-server-result';
 
 @Injectable({
   providedIn: 'root'
@@ -8,22 +9,14 @@ import {Apollo} from 'apollo-angular';
 export class ChatApiService {
 
   constructor(
-    private apollo: Apollo
+    private http: HttpClient,
   ) {
   }
 
 
-  readMessage(channelId: string, first: number, skip: number) {
-    return this.apollo.watchQuery({
-      query: READ_MESSAGE_PAGINATION,
-      variables: {
-        channelId,
-        first,
-        skip
-      },
-      fetchResults: true,
-      fetchPolicy: 'network-only',
-    });
+  public getMessages(page, limit) {
+    const url = 'http://localhost:3000/message';
+    return this.http.get(url, {params: {page, limit, channelId: '5ed4ccbf074bf760c20855f6'}}) as Observable<MessageServerResult>;
   }
 
 }

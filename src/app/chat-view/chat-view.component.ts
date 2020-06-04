@@ -1,8 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Datasource} from 'ngx-ui-scroll';
 import {MessageService} from './services/message.service';
-import {filter, take} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 import {QueryRef} from 'apollo-angular';
+import {ChatApiService} from './services/chat-api.service';
 
 @Component({
   selector: 'app-chat-view',
@@ -10,16 +11,19 @@ import {QueryRef} from 'apollo-angular';
   styleUrls: ['./chat-view.component.scss']
 })
 export class ChatViewComponent implements OnInit {
-  public queryRef: QueryRef<any>;
   @Input() channelId;
   startIndex = 1;
+  totalItems;
   data = [];
   datasource = new Datasource({
     get: (index, count) => {
-      return this.messageService.testFetchMore(this.queryRef, this.channelId, index, count);
+      return this.messageService.readMessagesData(index, count).pipe((map(items => {
+        this.totalItems = this.messageService.totalItems
+        return items;
+      })))
     },
     settings: {
-      startIndex: 0,
+      startIndex: 2  ,
       inverse: true
     },
     devSettings: {
@@ -34,15 +38,8 @@ export class ChatViewComponent implements OnInit {
 
 
   ngOnInit(): void {
-    console.log('ngOnInit');
-    this.queryRef = this.messageService.requestData(this.channelId, 0, 50);
-
-    // init queryRef
-    this.queryRef.valueChanges.subscribe((res) => {
-      console.log(res);
-      this.processNewMessages();
-    });
-
+    this.totalItems = this.messageService.totalItems;
+    this.processNewMessages();
   }
 
   processNewMessages() {
