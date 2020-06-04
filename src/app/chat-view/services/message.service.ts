@@ -1,7 +1,9 @@
 import {Injectable} from '@angular/core';
-import {forkJoin, of, Subject} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, of, Subject} from 'rxjs';
+import {map, tap} from 'rxjs/operators';
 import {RemoteService} from './remote.service';
+import {QueryRef} from 'apollo-angular';
+import {ChatApiService} from './chat-api.service';
 
 interface Item {
   id: number;
@@ -17,73 +19,54 @@ export class MessageService {
   cache: Map<number, any>;
   newMessages$: Subject<any[]>;
 
-  constructor(private remoteService: RemoteService) {
+  public queryRef: QueryRef<any>;
+
+  constructor(
+    private chatApi: ChatApiService,
+    private remoteService: RemoteService
+  ) {
     this.lastIndex = 0;
     this.cache = new Map<number, any>();
     this.newMessages$ = new Subject();
   }
 
   requestData(channelId, index: number, count: number) {
-    // looking for cached items
-
-    const result: any[] = [];
-    console.log('request:', index, count);
-    let _index = null;
-    for (let i = index; i < index + count; i++) {
-      const item = this.cache.get(i);
-      if (item) {
-        result.push(item);
-      } else {
-        _index = i;
-        break;
-      }
-    }
-    if (_index === null) {
-      return of(result);
-    }
-
-    // retrieve non-cached items
-    const _result = of(result);
-    const _count = count - (_index - index);
-    console.log('remote:', _index, _count);
-    return this.remoteService.retrieve(channelId, _index, _count)
-    // return forkJoin(this.remoteService.retrieve(channelId, _index, _count))
-    //   .pipe(
-    //     map((remote) => {
-    //       console.log('!!!!!!!!');
-    //       console.log(remote);
-    //
-    //       remote.forEach((item, i) => {
-    //         console.log(item);
-    //         this.cache.set(_index + i, item);
-    //         this.lastIndex = Math.max(this.lastIndex, _index + i);
-    //       });
-    //       return [...remote];
-    //     })
-    //   );
-
-
-    // return forkJoin(of(result), this.remoteService.retrieve(channelId, count, index ))
-    //   .pipe(
-    //     map(([cached, remote]) => {
-    //       console.log(cached, remote);
-    //       remote.forEach((item, i) => {
-    //         this.cache.set(_index + i, item);
-    //         this.lastIndex = Math.max(this.lastIndex, _index + i);
-    //         console.log(this.lastIndex)
-    //       });
-    //       return [...cached, ...remote];
-    //     })
-    //   );
+    return this.chatApi.readMessage(channelId, count, index );
   }
 
-  // appendNewMessages(count: number) {
-  //   this.remoteService.emulateNewMessages(count).subscribe(data => {
-  //     data.forEach((item, i) => {
-  //       this.lastIndex++;
-  //       this.cache.set(this.lastIndex, item);
-  //     });
-  //     this.newMessages$.next(data);
-  //   });
-  // }
+
+  testFetchMore(queryRef: QueryRef<any>, channelId, index: number, count: number): Observable<any[]> {
+    if (!queryRef || !channelId) return of([])
+    this.fetchMoreMessages(queryRef, channelId, count, this.lastIndex, (prev, {fetchMoreResult}) => {
+      this.lastIndex = count;
+      if (prev && prev.readMessageByChannelByDate && fetchMoreResult && fetchMoreResult.readMessageByChannelByDate) {
+        return   of([...prev.readMessageByChannelByDate, ...fetchMoreResult.readMessageByChannelByDate])
+      }
+    })
+    return queryRef.valueChanges.pipe(map(({data}) => data))
+      .pipe(map(({readMessageByChannelByDate}) => readMessageByChannelByDate))
+
+  }
+
+
+
+  private fetchMoreMessages(
+    queryRef: QueryRef<any>,
+    channelId: string,
+    first: number,
+    skip: number,
+    updateQuery: (prev, {fetchMoreResult}) => any | Observable<any>) {
+    if (!channelId) {
+      return;
+    }
+    if (!queryRef) return of([])
+    queryRef.fetchMore({
+      variables: {
+        channelId,
+        first,
+        skip
+      },
+      updateQuery
+    });
+  }
 }

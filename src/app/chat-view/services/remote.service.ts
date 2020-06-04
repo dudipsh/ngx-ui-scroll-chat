@@ -19,16 +19,6 @@ export class RemoteService {
   constructor(
     private chatApiService: ChatApiService,
   ) {
-    // for (let i = this.MIN; i <= this.MAX; i++) {
-    //   this.data = [];
-    //   this.chatApiService.readMessage('5ed4ccbf074bf760c20855f6', 1, 0).subscribe((res) => {
-    //     this.data = [...res];
-    //   })
-    // }
-    //
-    // for (let i = this.MIN; i <= this.MAX; i++) {
-    //   this.data.push(this.generateMessage(i + 1));
-    // }
   }
 
   generateMessage(index: number) {
@@ -38,14 +28,14 @@ export class RemoteService {
     };
   }
 
-  retrieve(channelId, index: number, count: number): Observable<Message[]> {
+  retrieve(channelId, index: number, count: number) {
     let data = [];
     const start = Math.max(this.MIN, index);
     const end = Math.min(index + count - 1, this.MAX);
     if (start <= end) {
       data = this.data.slice(start, end + 1);
     }
-    const readData = this.chatApiService.readMessage(channelId, count, start);
+    const readData = this.chatApiService.readMessage(channelId, start, start + count);
     return this.DELAY_MS > 0 ? readData : of(data);
     // let data = [];
     // const start = Math.max(this.MIN, index);
@@ -57,29 +47,5 @@ export class RemoteService {
     // readMessage
     // return this.DELAY_MS > 0 ? of(data).pipe(delay(this.DELAY_MS)) : of(data);
     // return this.DELAY_MS > 0 ? this.chatApiService.readMessage(channelId, index, count) : of(data);
-  }
-
-
-
-  // retrieve(index: number, count: number): Observable<Item[]> {
-  //   console.log(index)
-  //   console.log(count)
-  //   let data = [];
-  //   const start = Math.max(this.MIN, index);
-  //   const end = Math.min(index + count - 1, this.MAX);
-  //   if (start <= end) {
-  //     data = this.data.slice(start, end + 1);
-  //   }
-  //   return this.DELAY_MS > 0 ? of(data).pipe(delay(this.DELAY_MS)) : of(data);
-  // }
-
-  emulateNewMessages(count: number): Observable<any[]> {
-    const data = [];
-    // for (let i = this.MAX + 1; i < this.MAX + 1 + count; i++) {
-    //   data.push(this.generateMessage(i + 1));
-    // }
-    this.data.push(...data);
-    this.MAX += count;
-    return this.DELAY_MS > 0 ? of(data).pipe(delay(this.DELAY_MS)) : of(data);
   }
 }

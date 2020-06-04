@@ -1,8 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Datasource} from 'ngx-ui-scroll';
 import {MessageService} from './services/message.service';
-import {of} from 'rxjs';
 import {filter, take} from 'rxjs/operators';
+import {QueryRef} from 'apollo-angular';
 
 @Component({
   selector: 'app-chat-view',
@@ -10,20 +10,20 @@ import {filter, take} from 'rxjs/operators';
   styleUrls: ['./chat-view.component.scss']
 })
 export class ChatViewComponent implements OnInit {
-
+  public queryRef: QueryRef<any>;
   @Input() channelId;
-  itemsCount = 0;
+  startIndex = 1;
   data = [];
   datasource = new Datasource({
     get: (index, count) => {
-      return this.messageService.requestData(this.channelId, count, index);
+      return this.messageService.testFetchMore(this.queryRef, this.channelId, index, count);
     },
     settings: {
-      startIndex: 50,
+      startIndex: 0,
       inverse: true
     },
     devSettings: {
-      // debug: true
+      debug: false
     }
   });
 
@@ -34,20 +34,19 @@ export class ChatViewComponent implements OnInit {
 
 
   ngOnInit(): void {
-    console.log( 'lengt55h')
-    // this.messageService.requestData(this.channelId, 0, 50).subscribe((data) => {
-    //   //data.forEach((d) => this.data.push(d))
-    //   this.data = data;
-    //   console.log( 'length', this.data)
-    // }, (error => console.log(error)))
-   // this.processNewMessages();
-    // this.messageService.loadFirstBulk(this.channelId);
-    //  get first 50 items
+    console.log('ngOnInit');
+    this.queryRef = this.messageService.requestData(this.channelId, 0, 50);
+
+    // init queryRef
+    this.queryRef.valueChanges.subscribe((res) => {
+      console.log(res);
+      this.processNewMessages();
+    });
 
   }
 
   processNewMessages() {
-    const { adapter } = this.datasource;
+    const {adapter} = this.datasource;
     if (!adapter.isLoading) {
       return;
     }
