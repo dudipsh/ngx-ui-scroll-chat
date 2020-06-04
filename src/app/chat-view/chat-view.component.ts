@@ -1,9 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Datasource} from 'ngx-ui-scroll';
 import {MessageService} from './services/message.service';
-import {filter, map, take} from 'rxjs/operators';
-import {QueryRef} from 'apollo-angular';
-import {ChatApiService} from './services/chat-api.service';
+import {debounceTime, filter, map, take} from 'rxjs/operators';
 
 @Component({
   selector: 'app-chat-view',
@@ -15,15 +13,17 @@ export class ChatViewComponent implements OnInit {
   startIndex = 1;
   totalItems;
   data = [];
+  lastValue;
   datasource = new Datasource({
     get: (index, count) => {
       return this.messageService.readMessagesData(index, count).pipe((map(items => {
-        this.totalItems = this.messageService.totalItems
+        this.startIndex += items.length;
+        this.totalItems = this.messageService.totalItems;
         return items;
-      })))
+      }))).pipe(debounceTime(1000));
     },
     settings: {
-      startIndex: 2  ,
+      startIndex: this.totalItems,
       inverse: true
     },
     devSettings: {
@@ -39,7 +39,17 @@ export class ChatViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.totalItems = this.messageService.totalItems;
-    this.processNewMessages();
+    this.datasource.adapter.isLoading$
+       .pipe((debounceTime(300))) //
+      .subscribe((res) => {
+        if (this.lastValue !== res) {
+          if (res) {
+            this.processNewMessages();
+          }
+          // this.processNewMessages();
+        }
+        this.lastValue = res;
+      });
   }
 
   processNewMessages() {
