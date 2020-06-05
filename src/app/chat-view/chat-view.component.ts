@@ -1,30 +1,36 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {Datasource} from 'ngx-ui-scroll';
 import {MessageService} from './services/message.service';
-import {debounceTime, filter, map, take} from 'rxjs/operators';
+import {debounceTime, filter, map, take, throttle} from 'rxjs/operators';
+import {of} from 'rxjs';
 
 @Component({
   selector: 'app-chat-view',
   templateUrl: './chat-view.component.html',
   styleUrls: ['./chat-view.component.scss']
 })
-export class ChatViewComponent implements OnInit {
+export class ChatViewComponent implements OnInit , AfterViewInit{
+  MIN = 1;
+
+  @ViewChild('list', {static: true}) list: ElementRef
   @Input() channelId;
   startIndex = 1;
   totalItems;
   data = [];
   lastValue;
+  setState = {};
   datasource = new Datasource({
-    get: (index, count) => {
-      return this.messageService.readMessagesData(index, count).pipe((map(items => {
+    get:  (index, count) => {
+      const _index = -index - count + this.MIN;
+      return  this.messageService.readMessagesData(_index, count).pipe((map(items => {
         this.startIndex += items.length;
         this.totalItems = this.messageService.totalItems;
-        return items;
-      }))).pipe(debounceTime(1000));
+        return items
+      })));
     },
     settings: {
-      startIndex: this.totalItems,
-      inverse: true
+      startIndex: -10,
+       inverse: true
     },
     devSettings: {
       debug: false
@@ -39,18 +45,17 @@ export class ChatViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.totalItems = this.messageService.totalItems;
+
     this.datasource.adapter.isLoading$
        .pipe((debounceTime(300))) //
-      .subscribe((res) => {
-        if (this.lastValue !== res) {
-          if (res) {
-            this.processNewMessages();
-          }
-          // this.processNewMessages();
-        }
+        .subscribe((res) => {
         this.lastValue = res;
       });
+
   }
+
+
+
 
   processNewMessages() {
     const {adapter} = this.datasource;
@@ -64,6 +69,17 @@ export class ChatViewComponent implements OnInit {
         viewportElement.scrollTop = viewportElement.scrollHeight;
         adapter.clip();
       });
+  }
+
+  ngAfterViewInit(): void {
+    const el = this.list.nativeElement;
+    if (!el) {
+      return;
+    }
+    console.log(el)
+    // el.getBoundingClientRect().height
+    el.scrollTop = el.getBoundingClientRect().height;
+
   }
 
 }

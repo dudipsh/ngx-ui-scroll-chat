@@ -1,9 +1,9 @@
-<div id="viewport">
+<div id="viewport" #list>
   <div *uiScroll="let message of datasource">
     <div class="item">
       <pre>{{message | json}}</pre>
-      <div>{{message?.ts | date : 'dd-MM hh:mm'}} </div>
-      <div><b>{{message?.text}}</b></div>
+<!--      <div>{{message?.ts | date : 'dd-MM hh:mm'}} </div>-->
+<!--      <div><b>{{message?.text}}</b></div>-->
     </div>
   </div>
 

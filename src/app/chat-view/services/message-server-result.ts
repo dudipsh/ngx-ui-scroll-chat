@@ -4,6 +4,6 @@ export class MessageServerResult {
   totalCount: number;
   page: number;
   channelId: string;
-  limit: number
-  data: Message[]
+  limit: number;
+  data: Message[];
 }

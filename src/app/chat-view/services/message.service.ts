@@ -4,7 +4,7 @@ import {Message} from '../message';
 import {forkJoin, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 
-const mock = require('./mock.json')
+
 
 @Injectable({
   providedIn: 'root',
@@ -13,18 +13,18 @@ export class MessageService {
   lastIndex: number;
   cache: Map<number, Message>;
   totalItems = 1;
+  MIN = 1;
 
   constructor(
     private chatApi: ChatApiService,
   ) {
     this.lastIndex = -1;
     this.cache = new Map<number, Message>();
-    console.log(mock)
   }
 
 
   readMessagesData(index, count) {
-    // looking for cached items
+  //  looking for cached items
     if (index < 0) return of([])
     const result: Message[] = [];
     console.log('request:', index, count);
@@ -57,6 +57,15 @@ export class MessageService {
           return [...cached, ...remote.data];
         })
       );
-
+    // let data = [];
+    // const start = Math.max(this.MIN, index);
+    // const end = index + count - 1;
+    // if (start <= end) {
+    //   for (let i = start; i <= end; i++) {
+    //     data = [...data, { _id: i, text: 'item #' + i }]
+    //  //   data.unshift({ _id: i, text: 'item #' + i });
+    //   }
+    // }
+    // return of(data);
   }
 }
