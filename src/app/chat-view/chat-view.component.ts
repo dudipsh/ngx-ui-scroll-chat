@@ -1,18 +1,17 @@
 import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {Datasource} from 'ngx-ui-scroll';
 import {MessageService} from './services/message.service';
-import {debounceTime, filter, map, take, throttle} from 'rxjs/operators';
-import {of} from 'rxjs';
+import {debounceTime, filter, map, take} from 'rxjs/operators';
 
 @Component({
   selector: 'app-chat-view',
   templateUrl: './chat-view.component.html',
   styleUrls: ['./chat-view.component.scss']
 })
-export class ChatViewComponent implements OnInit , AfterViewInit{
+export class ChatViewComponent implements OnInit, AfterViewInit {
   MIN = 1;
 
-  @ViewChild('list', {static: true}) list: ElementRef
+  @ViewChild('list', {static: true}) list: ElementRef;
   @Input() channelId;
   startIndex = 1;
   totalItems;
@@ -20,17 +19,17 @@ export class ChatViewComponent implements OnInit , AfterViewInit{
   lastValue;
   setState = {};
   datasource = new Datasource({
-    get:  (index, count) => {
+    get: (index, count) => {
       const _index = -index - count + this.MIN;
-      return  this.messageService.readMessagesData(_index, count).pipe((map(items => {
+      return this.messageService.readMessagesData(_index, count).pipe((map(items => {
         this.startIndex += items.length;
         this.totalItems = this.messageService.totalItems;
-        return items
+        return items;
       })));
     },
     settings: {
       startIndex: -10,
-       inverse: true
+      inverse: true
     },
     devSettings: {
       debug: false
@@ -47,14 +46,13 @@ export class ChatViewComponent implements OnInit , AfterViewInit{
     this.totalItems = this.messageService.totalItems;
 
     this.datasource.adapter.isLoading$
-       .pipe((debounceTime(300))) //
-        .subscribe((res) => {
+      .pipe((debounceTime(300))) //
+      .subscribe((res) => {
+        this.processNewMessages();
         this.lastValue = res;
       });
 
   }
-
-
 
 
   processNewMessages() {
@@ -76,7 +74,7 @@ export class ChatViewComponent implements OnInit , AfterViewInit{
     if (!el) {
       return;
     }
-    console.log(el)
+    console.log(el);
     // el.getBoundingClientRect().height
     el.scrollTop = el.getBoundingClientRect().height;
 

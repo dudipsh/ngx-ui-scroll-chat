@@ -54,7 +54,7 @@ export class MessageService {
             this.lastIndex = Math.max(this.lastIndex, _index + i);
           });
           this.totalItems = remote.totalCount;
-          return [...cached, ...remote.data];
+          return [...cached, ...remote.data].reverse();
         })
       );
     // let data = [];
