@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {Datasource} from 'ngx-ui-scroll';
 import {MessageService} from './services/message.service';
-import {debounceTime, filter, map, take} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 
 @Component({
   selector: 'app-chat-view',
@@ -10,26 +10,36 @@ import {debounceTime, filter, map, take} from 'rxjs/operators';
 })
 export class ChatViewComponent implements OnInit, AfterViewInit {
   MIN = 1;
-
+  MAX = 1000;
   @ViewChild('list', {static: true}) list: ElementRef;
   @Input() channelId;
   startIndex = 1;
+  apiCounter = 0;
   totalItems;
   data = [];
+  indexTrack = [];
+  countTrack = [];
   lastValue;
   setState = {};
   datasource = new Datasource({
     get: (index, count) => {
+      this.indexTrack.push(index);
+      this.countTrack.push(count);
       const _index = -index - count + this.MIN;
-      return this.messageService.readMessagesData(_index, count).pipe((map(items => {
+      console.log(index);
+      return this.messageService.readMessagesData(index, count).pipe((map(items => {
         this.startIndex += items.length;
         this.totalItems = this.messageService.totalItems;
+        this.data = [...new Set([...this.data, ...items])];
+        this.apiCounter = this.messageService.apiCallCounter;
         return items;
       })));
     },
     settings: {
-      startIndex: -10,
-      inverse: true
+
+      startIndex: 1,
+      inverse: true,
+
     },
     devSettings: {
       debug: false
@@ -46,7 +56,7 @@ export class ChatViewComponent implements OnInit, AfterViewInit {
     this.totalItems = this.messageService.totalItems;
 
     this.datasource.adapter.isLoading$
-      .pipe((debounceTime(300))) //
+      .pipe(take(1)) //
       .subscribe((res) => {
         this.processNewMessages();
         this.lastValue = res;

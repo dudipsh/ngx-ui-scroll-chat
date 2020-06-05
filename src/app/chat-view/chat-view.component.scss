@@ -1,9 +1,21 @@
-#viewport {
-  width: 450px;
-  //height: 600px;
-  height: calc(100vh - 200px);
-  overflow-anchor: none;
-  overflow-y: scroll;
-  border: 1px blue solid;
-  border-radius: 5px;
+.layout {
+  display: flex;
+  #viewport {
+    width: 33%;
+    //height: 600px;
+    height: calc(100vh - 200px);
+    overflow-anchor: none;
+    overflow-y: scroll;
+    border: 1px blue solid;
+    border-radius: 5px;
+    padding: 20px 20px 0;
+  }
+  .logs {
+    height: calc(100vh - 200px);
+    overflow-y: scroll;
+    border: 1px #9fa5aa solid;
+    padding: 20px 20px 0;
+    margin-left: 20px;
+   }
 }
+

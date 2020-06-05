@@ -16,7 +16,7 @@ export class ChatApiService {
 
   public getMessages(page, limit) {
     const url = 'http://localhost:3000/message';
-    return this.http.get(url, {params: {page, limit, channelId: '5ed4ccbf074bf760c20855f6'}}) as Observable<MessageServerResult>;
+    return this.http.get(url, {params: {page, limit, channelId: '5eda510612472320c8cbc0bc'}}) as Observable<MessageServerResult>;
 
 
   }

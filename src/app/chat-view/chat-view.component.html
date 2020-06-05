@@ -1,13 +1,34 @@
-<div id="viewport" #list>
-  <div *uiScroll="let message of datasource">
-    <div class="item">
-      <pre>{{message | json}}</pre>
-<!--      <div>{{message?.ts | date : 'dd-MM hh:mm'}} </div>-->
-<!--      <div><b>{{message?.text}}</b></div>-->
+<div class="layout">
+  <div id="viewport" #list>
+    <div *uiScroll="let message of datasource ; let i = index">
+      <div class="item">
+        <!--      <pre>{{message | json}}</pre>-->
+        <div>{{message?.ts | date : 'dd-MM hh:mm'}} </div>
+        <div> <p>{{i}} <b>{{message?.text}}</b></p></div>
+      </div>
     </div>
+
+  </div>
+  <div class="logs">
+    <div>Data Length: {{data.length}}</div>
+    <div>Start INDEX: {{startIndex}}</div>
+    <div>TotalItems: {{totalItems}}</div>
+    <div>Elements in DOM: {{datasource.adapter.itemsCount}}</div>
+
+  </div>
+  <div class="logs">
+    <p>API_COUNTER:</p>
+    <pre>{{apiCounter | json}}</pre>
+  </div>
+  <div class="logs">
+    <p>INDEX_TRACK :</p>
+    <pre>{{indexTrack | json}}</pre>
+  </div>
+  <div class="logs">
+    <p>INDEX_TRACK: </p>
+    <pre>{{countTrack | json}}</pre>
   </div>
 
 </div>
-<div>Start INDEX: {{startIndex}}</div>
-<div>TotalItems: {{totalItems}}</div>
-<div>Elements in DOM: {{datasource.adapter.itemsCount}}</div>
+
+

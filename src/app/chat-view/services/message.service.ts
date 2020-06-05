@@ -13,6 +13,7 @@ export class MessageService {
   lastIndex: number;
   cache: Map<number, Message>;
   totalItems = 1;
+  apiCallCounter = 0;
   MIN = 1;
 
   constructor(
@@ -53,8 +54,11 @@ export class MessageService {
             this.cache.set(_index + i, item);
             this.lastIndex = Math.max(this.lastIndex, _index + i);
           });
+          this.apiCallCounter ++;
           this.totalItems = remote.totalCount;
-          return [...cached, ...remote.data].reverse();
+          console.log('CHAED', cached)
+          console.log('data', remote.data)
+          return [...cached, ...remote.data];
         })
       );
     // let data = [];
