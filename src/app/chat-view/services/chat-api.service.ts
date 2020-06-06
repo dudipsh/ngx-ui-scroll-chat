@@ -14,12 +14,10 @@ export class ChatApiService {
   }
 
 
-  public getMessages(page, limit) {
+  public getMessages(page, limit, orderBy: '-ts' | 'ts') {
     //const url = 'http://localhost:3000/message';
-    const url = 'http://graphql.vdi.co.il/message';
-    return this.http.get(url, {params: {page, limit, channelId: '5edaa34844a52a4e8a2159d9'}}) as Observable<MessageServerResult>;
-
-
+    const url = 'https://graphql.vdi.co.il/message';
+    return this.http.get(url, {params: {page, limit, orderBy, channelId: '5edaa34844a52a4e8a2159d9'}}) as Observable<MessageServerResult>;
   }
 
 }
