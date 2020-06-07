@@ -55,7 +55,7 @@ export class ChatViewComponent implements OnInit, AfterViewInit {
 
       const pagesRequest: any[] = [];
       for (let i = startPage; i <= endPage; i++) {
-        const {data, totalCount} =  await this.messageService.readMessagesData(i);
+        const {data, totalCount} =  await this.messageService.readMessagesData(i, endPage);
         this.totalItems = totalCount;
         pagesRequest.push(data);
       }

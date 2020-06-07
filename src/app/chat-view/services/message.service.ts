@@ -24,8 +24,8 @@ export class MessageService {
   }
 
 
-  async readMessagesData(index) {
-    const items = await this.chatApi.getMessages(index + 1, 30).toPromise();
+  async readMessagesData(index, count) {
+    const items = await this.chatApi.getMessages(index , count, '-ts').toPromise();
     return items
   //  looking for cached items
   //   if (index < 0) return of([])
