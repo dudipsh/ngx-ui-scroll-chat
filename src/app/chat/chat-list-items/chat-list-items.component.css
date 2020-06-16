@@ -1,0 +1,15 @@
+.viewport {
+    width: 100%;
+    height: calc(100vh - 230px);
+    overflow-anchor: none;
+    overflow-y: scroll;
+}
+
+.item {
+    background-color: #f1fffc;
+    min-height: 180px;
+}
+
+.item.even {
+    background-color: #fffedf;
+}

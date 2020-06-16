@@ -27,7 +27,7 @@
     "apollo-link-ws": "^1.0.20",
     "graphql": "^14.6.0",
     "graphql-tag": "^2.10.0",
-    "ngx-ui-scroll": "^1.6.6",
+    "ngx-ui-scroll": "^1.7.0",
     "rxjs": "~6.5.4",
     "subscriptions-transport-ws": "^0.9.16",
     "tslib": "^1.10.0",

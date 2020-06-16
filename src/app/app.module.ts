@@ -1,17 +1,19 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { ChatViewComponent } from './chat-view/chat-view.component';
+import {AppRoutingModule} from './app-routing.module';
+import {AppComponent} from './app.component';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {InterceptorService} from './factory/interceptor';
 import {UiScrollModule} from 'ngx-ui-scroll';
+import {ChatComponent} from "./chat/chat.component";
+import {ChatListItemsComponent} from "./chat/chat-list-items/chat-list-items.component";
 
 @NgModule({
   declarations: [
     AppComponent,
-    ChatViewComponent,
+    ChatComponent,
+    ChatListItemsComponent
   ],
   imports: [
     BrowserModule,
@@ -25,4 +27,5 @@ import {UiScrollModule} from 'ngx-ui-scroll';
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

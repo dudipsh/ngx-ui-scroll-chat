@@ -1,0 +1,11 @@
+<div class="viewport" #viewport>
+    <div *uiScroll="let item of datasource; let even = even">
+        <div class="item" [class.even]="even">
+            <pre>{{item.text}}</pre>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<div>Elements in DOM: {{datasource.adapter.itemsCount}}</div>
