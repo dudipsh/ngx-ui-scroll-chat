@@ -30,7 +30,7 @@ export class ChatComponent implements OnInit, OnDestroy  {
     }
 
     ngOnInit(): void {
-      this.activeChannel = '5edaa34844a52a4e8a2159d9';
+      this.activeChannel = '5eec5bf61cfa5bd2b297a496';
       this.chatService.readMessagesInChannel(this.activeChannel, 0, 1, 'ts')
         .subscribe((serverData: MessagesFetchDataResult) => {
           if (serverData.totalCount > 0) {
